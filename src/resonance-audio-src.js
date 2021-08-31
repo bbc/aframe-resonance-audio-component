@@ -38,7 +38,8 @@ AFRAME.registerComponent('resonance-audio-src', {
     visualize: { type: 'boolean', default: false }
   },
 
-  init () {
+    init () {
+        console.log("Initialising audio source from @Mhairifin");
     // The room this audio source is in.
     this.room = null
     // The connection status.
@@ -65,7 +66,8 @@ AFRAME.registerComponent('resonance-audio-src', {
     this.el.addEventListener('componentchanged', this.onEntityChange)
   },
 
-  update (oldData) {
+    update (oldData) {
+        console.log("performing an update");
     if (this.room && oldData.src !== this.data.src) {
       this.connectSrc(this.data.src)
     }
