@@ -59,12 +59,29 @@ AFRAME.registerComponent('resonance-audio-src', {
     // A mapping of elements and stream to their source AudioNode objects.
     // We use a mapping so the created MediaElementAudioSourceNode and MediaStreamAudioSourceNode
     // objects can be reused.
-    this.mediaAudioSourceNodes = new Map()
+        this.mediaAudioSourceNodes = new Map()
+
+        this.analyser = null;
 
     // Update on entity change.
     this.onEntityChange = this.onEntityChange.bind(this)
     this.el.addEventListener('componentchanged', this.onEntityChange)
-  },
+    },
+
+    tick(time) {
+        console.log(time);
+        this.changeVis();
+    },
+
+    changeVis: function(time) {
+        let data = new UInt8Array(analyser.frequencyBinCount);
+
+        return function() {
+            let v = this.el.getObject3D(visName)
+            this.analyser.getByteFrequencyData(data);
+            return this
+        }
+    },
 
     update (oldData) {
         console.log("performing an update");
@@ -164,18 +181,19 @@ AFRAME.registerComponent('resonance-audio-src', {
    * @param {boolean} current - the new setting
    */
   toggleShowVisualization (previous, current) {
-    if (!previous && current) {
+      if (!previous && current) {
+          let object = new THREE.Mesh(
+              new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
+              new THREE.MeshStandardMaterial({
+                  color: 0xffffff,
+                  metalness: 0,
+                  wireframe: true,
+                  visible: true
+              })
+          );
       this.el.setObject3D(
-        visName,
-        new THREE.Mesh(
-          new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
-          new THREE.MeshStandardMaterial({
-            color: 0xffffff,
-            metalness: 0,
-            wireframe: true,
-            visible: true
-          })
-        )
+        visName, object
+          
       )
     } else if (previous && !current && this.el.getObject3D(visName)) {
       this.el.removeObject3D(visName)
@@ -328,6 +346,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     this.mediaAudioSourceNodes.set(
       this.defaultAudioEl, this.room.audioContext.createMediaElementSource(this.defaultAudioEl)
     )
+      
     return this.room
   },
 
@@ -364,8 +383,17 @@ AFRAME.registerComponent('resonance-audio-src', {
     if (!this.mediaAudioSourceNodes.has(this.sound)) {
       this.mediaAudioSourceNodes.set(this.sound, createSourceFn.call(this.room.audioContext, this.sound))
     }
+
+      // Add analyser node for analysing the audio for visualisation
+      this.analyser = this.room.audioContext.createAnalyser();
+
+      this.mediaAudioSourceNodes.get(this.sound).connect(this.analyser).connect(this.resonance.input);
     // Get elemenent source AudioNode.
-    this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
+      //this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
+
+      // Add audio analyser node
+      
+      this.analyser.fftSize = 512;
 
     return true
   },
