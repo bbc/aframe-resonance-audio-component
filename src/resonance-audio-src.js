@@ -4,6 +4,11 @@ const { isVec3Set, onceWhenLoaded } = require('./utils')
 
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
+
+/*
+Change to check something
+*/
+
 /**
  * The Object3D name of the visualization.
  */
