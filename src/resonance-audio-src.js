@@ -79,6 +79,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         return function() {
             let v = this.el.getObject3D(visName)
             this.analyser.getByteFrequencyData(data);
+            console.log("is this running?");
             console.log(data);
             v.material.color.setHex()
             return this
