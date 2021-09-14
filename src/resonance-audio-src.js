@@ -78,15 +78,18 @@ AFRAME.registerComponent('resonance-audio-src', {
     changeVis: function(time) {
 
         let v = this.el.getObject3D(visName)
-        this.analyser.getByteFrequencyData(this.freq_data);
 
-        let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
-        let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
-        let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
+        if (this.analyser) {
+            this.analyser.getByteFrequencyData(this.freq_data);
 
-        var lowAvg = avg(lowerFreq);
+            let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
+            let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
+            let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
 
-        var highAvg = avg(higherFreq);
+            var lowAvg = avg(lowerFreq);
+
+            var highAvg = avg(higherFreq);
+        }
 
         
         return this;
