@@ -70,21 +70,17 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
 
     tick(time) {
-        this.changeVis()();
+        this.changeVis();
     },
 
     changeVis: function(time) {
         let data = new Uint8Array(this.analyser.frequencyBinCount);
-
-        return function() {
-            let v = this.el.getObject3D(visName)
-            this.analyser.getByteFrequencyData(data);
-            console.log("is this running?");
-            console.log(data);
-            v.material.color.setHex(0xc70039);
-            return this;
-            
-        }
+        let v = this.el.getObject3D(visName)
+        this.analyser.getByteFrequencyData(data);
+        console.log("is this running?");
+        console.log(data);
+        v.material.color.setHex(0xc70039);
+        return this;
     },
 
     update (oldData) {
