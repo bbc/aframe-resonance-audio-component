@@ -79,7 +79,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
 
     changeVis: function(time) {
-        let data = new UInt8Array(analyser.frequencyBinCount);
+        let data = new Uint8Array(analyser.frequencyBinCount);
 
         return function() {
             let v = this.el.getObject3D(visName)
