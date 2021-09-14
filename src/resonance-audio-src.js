@@ -5,10 +5,6 @@ const { isVec3Set, onceWhenLoaded } = require('./utils')
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
 
-/*
-Change to check something
-*/
-
 /**
  * The Object3D name of the visualization.
  */
@@ -74,7 +70,6 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
 
     tick(time) {
-        console.log(time);
         this.changeVis();
     },
 
@@ -84,6 +79,8 @@ AFRAME.registerComponent('resonance-audio-src', {
         return function() {
             let v = this.el.getObject3D(visName)
             this.analyser.getByteFrequencyData(data);
+            console.log(data);
+            v.material.color.setHex()
             return this
         }
     },
@@ -191,7 +188,7 @@ AFRAME.registerComponent('resonance-audio-src', {
               new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
               new THREE.MeshStandardMaterial({
                   color: 0xffffff,
-                  metalness: 0,
+                  metalness: 0.5,
                   wireframe: true,
                   visible: true
               })
