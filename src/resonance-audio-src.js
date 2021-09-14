@@ -64,6 +64,8 @@ AFRAME.registerComponent('resonance-audio-src', {
 
         this.analyser = null;
 
+        this.freq_data = new Uint8Array(this.analyser.frequencyBinCount);
+
     // Update on entity change.
     this.onEntityChange = this.onEntityChange.bind(this)
     this.el.addEventListener('componentchanged', this.onEntityChange)
@@ -74,12 +76,19 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
 
     changeVis: function(time) {
-        let data = new Uint8Array(this.analyser.frequencyBinCount);
+
         let v = this.el.getObject3D(visName)
-        this.analyser.getByteFrequencyData(data);
-        console.log("is this running?");
-        console.log(data);
-        v.material.color.setHex(0xc70039);
+        this.analyser.getByteFrequencyData(this.freq_data);
+
+        let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
+        let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
+        let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
+
+        var lowAvg = avg(lowerFreq);
+
+        var highAvg = avg(higherFreq);
+
+        
         return this;
     },
 
@@ -185,7 +194,7 @@ AFRAME.registerComponent('resonance-audio-src', {
           let object = new THREE.Mesh(
               new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
               new THREE.MeshStandardMaterial({
-                  color: 0xffffff,
+                  color: 0xc70039 ,
                   metalness: 0.5,
                   wireframe: true,
                   visible: true
