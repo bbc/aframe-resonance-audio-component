@@ -70,7 +70,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
 
     tick(time) {
-        this.changeVis();
+        this.changeVis()();
     },
 
     changeVis: function(time) {
@@ -81,8 +81,9 @@ AFRAME.registerComponent('resonance-audio-src', {
             this.analyser.getByteFrequencyData(data);
             console.log("is this running?");
             console.log(data);
-            v.material.color.setHex()
-            return this
+            v.material.color.setHex(0xc70039);
+            return this;
+            
         }
     },
 
