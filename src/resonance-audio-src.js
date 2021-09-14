@@ -399,11 +399,12 @@ AFRAME.registerComponent('resonance-audio-src', {
       // Add analyser node for analysing the audio for visualisation
       this.analyser = this.room.audioContext.createAnalyser();
 
+      console.log("created analyser node");
+
       this.mediaAudioSourceNodes.get(this.sound).connect(this.analyser).connect(this.resonance.input);
     // Get elemenent source AudioNode.
       //this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
 
-      // Add audio analyser node
       
       this.analyser.fftSize = 512;
 
