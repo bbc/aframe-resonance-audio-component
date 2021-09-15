@@ -81,9 +81,11 @@ AFRAME.registerComponent('resonance-audio-src', {
 
         this.analyser.getByteFrequencyData(this.freq_data);
 
-        let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
-        let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
-        let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
+        let length = this.freq_data.length;
+
+        let lowerFreq = this.freq_data.slice(0, (length/3) -1);
+        let middleFreq = this.freq_data.slice((length/3) -1, (length/3)*2 -1);
+        let higherFreq = this.freq_data.slice((length/3)*2 -1, length-1);
 
         var getMaxIndex = function(array) {
             let highestNum = 0;
