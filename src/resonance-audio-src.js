@@ -64,7 +64,7 @@ AFRAME.registerComponent('resonance-audio-src', {
 
         this.analyser = null;
 
-        this.freq_data = new Uint8Array(this.analyser.frequencyBinCount);
+        this.freq_data = null;
 
     // Update on entity change.
     this.onEntityChange = this.onEntityChange.bind(this)
@@ -79,17 +79,50 @@ AFRAME.registerComponent('resonance-audio-src', {
 
         let v = this.el.getObject3D(visName)
 
-        if (this.analyser) {
-            this.analyser.getByteFrequencyData(this.freq_data);
+        this.analyser.getByteFrequencyData(this.freq_data);
 
-            let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
-            let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
-            let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
+        let lowerFreq = this.freq_data.slice(0, (freq_data.length/3) -1);
+        let middleFreq = this.freq_data.slice((freq_data.length/3) -1, (freq_data.length/3)*2 -1);
+        let higherFreq = this.freq_data.slice((freq_data.length/3)*2 -1, freq_data.length-1);
 
-            var lowAvg = avg(lowerFreq);
+        var getMaxIndex = function(array) {
+            let highestNum = 0;
+            let highestIndex = -1;
+            for (var i = 0; i<array.length; i++) {
+                var num = array[i]
+                if (num > highestNum) {
+                    num = highestNum;
+                    highestIndex = i;
 
-            var highAvg = avg(higherFreq);
+                }
+            }
+            return highestIndex;
         }
+        
+        var lowIndex = getMaxIndex(lowerFreq);
+        var midIndex = getMaxIndex(middleFreq);
+        var highIndex = getMaxIndex(higherFreq);
+
+        var r = lowIndex*3;
+        var g = midIndex*3;
+        var b = highIndex*3;
+
+        var colourToHex = function(colour) {
+            var hex = colour.toString(16);
+            if (hex.length == 1) {
+                return "0" + hex;
+            }
+            return hex;
+        }
+
+
+        var rgbToHex = function(r,g,b) {
+            return colourToHex(r) + colourToHex(g) + colourToHex(b);
+        }
+
+        var numColour = parseInt(rgbToHex(r,g,b), 16);
+
+        v.material.color.setHex(numColour);
 
         
         return this;
@@ -398,6 +431,8 @@ AFRAME.registerComponent('resonance-audio-src', {
 
       // Add analyser node for analysing the audio for visualisation
       this.analyser = this.room.audioContext.createAnalyser();
+
+      this.freq_data = new Uint8Array(this.analyser.frequencyBinCount);
 
       console.log("created analyser node");
 
