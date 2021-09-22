@@ -9,6 +9,7 @@ const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
  * The Object3D name of the visualization.
  */
 const visName = 'audio-src'
+var printed = 0;
 
 AFRAME.registerComponent('resonance-audio-src', {
   dependencies: ['position', 'rotation'],
@@ -130,9 +131,15 @@ AFRAME.registerComponent('resonance-audio-src', {
         var rgbToHex = function(r,g,b) {
             return colourToHex(r) + colourToHex(g) + colourToHex(b);
         }
+        var hex = rgbToHex(r,g,b);
 
-        var numColour = parseInt(rgbToHex(r,g,b), 16);
-        console.log(numColour);
+        var numColour = parseInt(hex, 16);
+
+        if (printed < 5) {
+            printed = printed + 1;
+            console.log(hex);
+            console.log(numColour);
+        }
 
         v.material.color.setHex(numColour);
 
