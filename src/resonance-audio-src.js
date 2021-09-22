@@ -110,7 +110,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         //var g = midIndex*3;
         //var b = highIndex*3;
 
-        var avg = function(arr) {
+        function avg(arr) {
             const average = arr => arr.reduce((a,b) => a+b, 0)/ arr.length;
             return average;
         }
@@ -123,7 +123,7 @@ AFRAME.registerComponent('resonance-audio-src', {
             console.log(r);
         }
 
-        var colourToHex = function(colour) {
+        function colourToHex(colour) {
             var hex = Number.toString(colour, 16);
             if (hex.length == 1) {
                 return "0" + hex;
@@ -132,7 +132,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         }
 
 
-        var rgbToHex = function(r,g,b) {
+        function rgbToHex(r,g,b) {
             return colourToHex(r) + colourToHex(g) + colourToHex(b);
         }
         var hex = rgbToHex(r,g,b);
