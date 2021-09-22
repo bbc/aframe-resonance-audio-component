@@ -105,9 +105,13 @@ AFRAME.registerComponent('resonance-audio-src', {
         var midIndex = getMaxIndex(middleFreq);
         var highIndex = getMaxIndex(higherFreq);
 
-        var r = lowIndex*3;
-        var g = midIndex*3;
-        var b = highIndex*3;
+        //var r = lowIndex*3;
+        //var g = midIndex*3;
+        //var b = highIndex*3;
+
+        let r = Math.floor(avg(lowerFreq));
+        let g = Math.floor(avg(middleFreq));
+        let b = Math.floor(avg(higherFreq));
 
         var colourToHex = function(colour) {
             var hex = colour.toString(16);
@@ -123,6 +127,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         }
 
         var numColour = parseInt(rgbToHex(r,g,b), 16);
+        console.log(numColour);
 
         v.material.color.setHex(numColour);
 
