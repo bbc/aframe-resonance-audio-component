@@ -4,6 +4,27 @@ const { isVec3Set, onceWhenLoaded } = require('./utils')
 
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
+function avg(arr) {
+            var average = arr => arr.reduce((a,b) => a+b, 0)/ arr.length;
+            return average;
+}
+
+function colourToHex(colour) {
+            var hex = colour.toString(16);
+            if (hex.length == 1) {
+                return "0" + hex;
+            }
+            return hex;
+
+}
+
+
+
+function rgbToHex(r,g,b) {
+            return colourToHex(r) + colourToHex(g) + colourToHex(b);
+
+}
+
 
 /**
  * The Object3D name of the visualization.
@@ -110,10 +131,6 @@ AFRAME.registerComponent('resonance-audio-src', {
         //var g = midIndex*3;
         //var b = highIndex*3;
 
-        function avg(arr) {
-            const average = arr => arr.reduce((a,b) => a+b, 0)/ arr.length;
-            return average;
-        }
 
         let r = Math.floor(avg(lowerFreq));
         let g = Math.floor(avg(middleFreq));
@@ -123,18 +140,6 @@ AFRAME.registerComponent('resonance-audio-src', {
             console.log(r);
         }
 
-        function colourToHex(colour) {
-            var hex = colour.toString(16);
-            if (hex.length == 1) {
-                return "0" + hex;
-            }
-            return hex;
-        }
-
-
-        function rgbToHex(r,g,b) {
-            return colourToHex(r) + colourToHex(g) + colourToHex(b);
-        }
         var hex = rgbToHex(r,g,b);
 
         var numColour = parseInt(hex, 16);
