@@ -141,26 +141,22 @@ AFRAME.registerComponent('resonance-audio-src', {
         //var b = highIndex*3;
 
 
-        let r = Math.floor(avg(lowerFreq));
-        let g = Math.floor(avg(middleFreq));
-        let b = Math.floor(avg(higherFreq));
+        let r = 255 - Math.floor(avg(lowerFreq));
+        let g = 255 - Math.floor(avg(middleFreq));
+        let b = 255 - Math.floor(avg(higherFreq));
 
-        if (printed < 5) {
-            console.log("R code");
-            console.log(r);
+        if (r != 0 && printed < 5) {
+
+            printed = printed + 1;
+            console.log("rgb");
+            console.log(r)
+            console.log(g)
+            console.log(b)
         }
 
         var hex = rgbToHex(r,g,b);
 
         var numColour = parseInt(hex, 16);
-
-        if (printed < 5) {
-            printed = printed + 1;
-            console.log("hex")
-            console.log(hex);
-            console.log("num");
-            console.log(numColour);
-        }
 
         v.material.color.setHex(numColour);
 
