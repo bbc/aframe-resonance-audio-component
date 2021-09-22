@@ -109,6 +109,11 @@ AFRAME.registerComponent('resonance-audio-src', {
         //var g = midIndex*3;
         //var b = highIndex*3;
 
+        var avg = function(arr) {
+            const average = arr => arr.reduce((a,b) => a+b, 0)/ arr.length;
+            return average;
+        }
+
         let r = Math.floor(avg(lowerFreq));
         let g = Math.floor(avg(middleFreq));
         let b = Math.floor(avg(higherFreq));
