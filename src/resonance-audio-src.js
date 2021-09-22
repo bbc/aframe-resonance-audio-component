@@ -119,8 +119,12 @@ AFRAME.registerComponent('resonance-audio-src', {
         let g = Math.floor(avg(middleFreq));
         let b = Math.floor(avg(higherFreq));
 
+        if (printed < 5) {
+            console.log(r);
+        }
+
         var colourToHex = function(colour) {
-            var hex = colour.toString(16);
+            var hex = Number.toString(colour, 16);
             if (hex.length == 1) {
                 return "0" + hex;
             }
