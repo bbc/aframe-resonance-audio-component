@@ -124,7 +124,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         }
 
         function colourToHex(colour) {
-            var hex = Number.toString(colour, 16);
+            var hex = colour.toString(16);
             if (hex.length == 1) {
                 return "0" + hex;
             }
