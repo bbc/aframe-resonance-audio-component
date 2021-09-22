@@ -5,23 +5,32 @@ const { isVec3Set, onceWhenLoaded } = require('./utils')
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
 function avg(arr) {
-            var average = arr => arr.reduce((a,b) => a+b, 0)/ arr.length;
-            return average;
+    var sum = 0;
+    for (var i = 0; i< arr.length; i++) {
+        sum = sum + arr[i];
+    }
+    var average = sum / arr.length;
+
+    return average;
 }
 
 function colourToHex(colour) {
-            var hex = colour.toString(16);
-            if (hex.length == 1) {
-                return "0" + hex;
-            }
-            return hex;
+
+    var hex = colour.toString(16);
+
+    if (hex.length == 1) {
+
+        return "0" + hex;
+
+    }
+
+    return hex;
 
 }
 
-
-
 function rgbToHex(r,g,b) {
-            return colourToHex(r) + colourToHex(g) + colourToHex(b);
+
+    return colourToHex(r) + colourToHex(g) + colourToHex(b);
 
 }
 
@@ -137,6 +146,7 @@ AFRAME.registerComponent('resonance-audio-src', {
         let b = Math.floor(avg(higherFreq));
 
         if (printed < 5) {
+            console.log("R code");
             console.log(r);
         }
 
@@ -146,7 +156,9 @@ AFRAME.registerComponent('resonance-audio-src', {
 
         if (printed < 5) {
             printed = printed + 1;
+            console.log("hex")
             console.log(hex);
+            console.log("num");
             console.log(numColour);
         }
 
