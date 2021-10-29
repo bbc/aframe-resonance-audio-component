@@ -2,6 +2,13 @@
 const { ResonanceAudio } = require('resonance-audio')
 const { isVec3Set, onceWhenLoaded } = require('./utils')
 
+/* This is the a-resonance-audio-src definition created by @digaverse
+* Under MIT License so we are good to use and adapt
+* I added in an analyser node, and then added in function changeVis
+* changeVis runs on every render (see tick handler in aframe documentation to understand when it runs)
+* It also collects the frequency data on every rerender
+*/
+
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
 function avg(arr) {
@@ -71,7 +78,6 @@ AFRAME.registerComponent('resonance-audio-src', {
   },
 
     init () {
-        console.log("Initialising audio source from @Mhairifin");
     // The room this audio source is in.
     this.room = null
     // The connection status.
@@ -93,7 +99,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     // objects can be reused.
         this.mediaAudioSourceNodes = new Map()
 
-        this.analyser = null;
+        this.analyser = null; // for the analyser node
 
         this.freq_data = null;
 
@@ -102,9 +108,18 @@ AFRAME.registerComponent('resonance-audio-src', {
     this.el.addEventListener('componentchanged', this.onEntityChange)
     },
 
+    // Tick is called every time it rerenders - calls changeVis
     tick(time) {
-        this.changeVis();
+        this.changeVis(time);
     },
+
+    /*
+     * changeVis is called on every rerender to change the visualisation based on the frequency data
+     * gets the frequency data of the sound and stores in this.freq_data
+     * can then use that frequency data to adapt the visualisation - I experimented with pulling out the most emphasised frequency and generating colour based on that
+     * v is the visualisation, and a Threejs object, so change v to change the vis
+     * It doesn't work as I intended it to work (I think my hex -> rgb code is wrong) but it definitely changes the colour so this approach definitely works
+     */
 
     changeVis: function(time) {
 
@@ -144,15 +159,6 @@ AFRAME.registerComponent('resonance-audio-src', {
         let r = 255 - Math.floor(avg(lowerFreq));
         let g = 255 - Math.floor(avg(middleFreq));
         let b = 255 - Math.floor(avg(higherFreq));
-
-        if (r != 0 && printed < 5) {
-
-            printed = printed + 1;
-            console.log("rgb");
-            console.log(r)
-            console.log(g)
-            console.log(b)
-        }
 
         var hex = rgbToHex(r,g,b);
 
