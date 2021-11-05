@@ -527,7 +527,8 @@ AFRAME.registerComponent('resonance-audio-src', {
    */
   disconnect () {
     if (this.sound && this.resonance) {
-      this.mediaAudioSourceNodes.get(this.sound).disconnect(this.resonance.input)
+        this.mediaAudioSourceNodes.get(this.sound).disconnect(this.analyser)
+        this.analyser.disconnect(this.resonance.input)
       this.sound = null
     }
     this.connected.element = false
