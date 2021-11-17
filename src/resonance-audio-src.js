@@ -11,42 +11,38 @@ const { isVec3Set, onceWhenLoaded } = require('./utils')
 
 const warn = AFRAME.utils.debug('components:resonance-audio-src:warn')
 
-function avg(arr) {
-    var sum = 0;
-    for (var i = 0; i< arr.length; i++) {
-        sum = sum + arr[i];
+function avg (arr) {
+  let sum = 0
+  for (let i = 0; i < arr.length; i++) {
+    sum = sum + arr[i]
+  }
+  const average = sum / arr.length
+
+  return average
+}
+
+function rgbToHex (r, g, b) {
+  return r << 16 | g << 8 | b
+}
+
+function getMaxIndex (array) {
+  let highestNum = 0
+  let highestIndex = -1
+  for (let i = 0; i < array.length; i++) {
+    const num = array[i]
+    if (num > highestNum) {
+      highestNum = num
+      highestIndex = i
     }
-    var average = sum / arr.length;
-
-    return average;
+  }
+  return highestIndex
 }
-
-function colourToHex(colour) {
-
-    var hex = colour.toString(16);
-
-    if (hex.length == 1) {
-
-        return "0" + hex;
-
-    }
-
-    return hex;
-
-}
-
-function rgbToHex(r,g,b) {
-
-    return colourToHex(r) + colourToHex(g) + colourToHex(b);
-
-}
-
 
 /**
  * The Object3D name of the visualization.
  */
 const visName = 'audio-src'
-var printed = 0;
+const printed = 0
 
 AFRAME.registerComponent('resonance-audio-src', {
   dependencies: ['position', 'rotation'],
@@ -77,7 +73,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     visualize: { type: 'boolean', default: false }
   },
 
-    init () {
+  init () {
     // The room this audio source is in.
     this.room = null
     // The connection status.
@@ -97,23 +93,23 @@ AFRAME.registerComponent('resonance-audio-src', {
     // A mapping of elements and stream to their source AudioNode objects.
     // We use a mapping so the created MediaElementAudioSourceNode and MediaStreamAudioSourceNode
     // objects can be reused.
-        this.mediaAudioSourceNodes = new Map()
+    this.mediaAudioSourceNodes = new Map()
 
-        this.analyser = null; // for the analyser node
+    this.analyser = null // for the analyser node
 
-        this.freq_data = null;
+    this.freq_data = null
 
     // Update on entity change.
     this.onEntityChange = this.onEntityChange.bind(this)
     this.el.addEventListener('componentchanged', this.onEntityChange)
-    },
+  },
 
-    // Tick is called every time it rerenders - calls changeVis
-    tick(time) {
-        this.changeVis(time);
-    },
+  // Tick is called every time it rerenders - calls changeVis
+  tick (time) {
+    this.changeVis(time)
+  },
 
-    /*
+  /*
      * changeVis is called on every rerender to change the visualisation based on the frequency data
      * gets the frequency data of the sound and stores in this.freq_data
      * can then use that frequency data to adapt the visualisation - I experimented with pulling out the most emphasised frequency and generating colour based on that
@@ -121,57 +117,38 @@ AFRAME.registerComponent('resonance-audio-src', {
      * It doesn't work as I intended it to work (I think my hex -> rgb code is wrong) but it definitely changes the colour so this approach definitely works
      */
 
-    changeVis: function(time) {
+  changeVis: function (time) {
+    const v = this.el.getObject3D(visName)
 
-        let v = this.el.getObject3D(visName)
+    if (v) {
+      this.analyser.getByteFrequencyData(this.freq_data)
 
-        this.analyser.getByteFrequencyData(this.freq_data);
+      const length = this.freq_data.length
 
-        let length = this.freq_data.length;
+      const lowerFreq = this.freq_data.slice(0, (length / 3) - 1)
+      const middleFreq = this.freq_data.slice((length / 3) - 1, (length / 3) * 2 - 1)
+      const higherFreq = this.freq_data.slice((length / 3) * 2 - 1, length - 1)
 
-        let lowerFreq = this.freq_data.slice(0, (length/3) -1);
-        let middleFreq = this.freq_data.slice((length/3) -1, (length/3)*2 -1);
-        let higherFreq = this.freq_data.slice((length/3)*2 -1, length-1);
+      // var lowIndex = getMaxIndex(lowerFreq);
+      // var midIndex = getMaxIndex(middleFreq);
+      // var highIndex = getMaxIndex(higherFreq);
 
-        var getMaxIndex = function(array) {
-            let highestNum = 0;
-            let highestIndex = -1;
-            for (var i = 0; i<array.length; i++) {
-                var num = array[i]
-                if (num > highestNum) {
-                    num = highestNum;
-                    highestIndex = i;
+      // var r = lowIndex*3;
+      // var g = midIndex*3;
+      // var b = highIndex*3;
 
-                }
-            }
-            return highestIndex;
-        }
-        
-        var lowIndex = getMaxIndex(lowerFreq);
-        var midIndex = getMaxIndex(middleFreq);
-        var highIndex = getMaxIndex(higherFreq);
+      const r = 255 - Math.floor(avg(lowerFreq))
+      const g = 255 - Math.floor(avg(middleFreq))
+      const b = 255 - Math.floor(avg(higherFreq))
 
-        //var r = lowIndex*3;
-        //var g = midIndex*3;
-        //var b = highIndex*3;
+      v.material.color.setHex(rgbToHex(r, g, b))
+    }
 
+    return this
+  },
 
-        let r = 255 - Math.floor(avg(lowerFreq));
-        let g = 255 - Math.floor(avg(middleFreq));
-        let b = 255 - Math.floor(avg(higherFreq));
-
-        var hex = rgbToHex(r,g,b);
-
-        var numColour = parseInt(hex, 16);
-
-        v.material.color.setHex(numColour);
-
-        
-        return this;
-    },
-
-    update (oldData) {
-        console.log("performing an update");
+  update (oldData) {
+    console.log('performing an update')
     if (this.room && oldData.src !== this.data.src) {
       this.connectSrc(this.data.src)
     }
@@ -268,19 +245,19 @@ AFRAME.registerComponent('resonance-audio-src', {
    * @param {boolean} current - the new setting
    */
   toggleShowVisualization (previous, current) {
-      if (!previous && current) {
-          let object = new THREE.Mesh(
-              new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
-              new THREE.MeshStandardMaterial({
-                  color: 0xc70039 ,
-                  metalness: 0.5,
-                  wireframe: true,
-                  visible: true
-              })
-          );
+    if (!previous && current) {
+      const object = new THREE.Mesh(
+        new THREE.SphereBufferGeometry(this.data.minDistance, 36, 18),
+        new THREE.MeshStandardMaterial({
+          color: 0xc70039,
+          metalness: 0.5,
+          wireframe: true,
+          visible: true
+        })
+      )
       this.el.setObject3D(
         visName, object
-          
+
       )
     } else if (previous && !current && this.el.getObject3D(visName)) {
       this.el.removeObject3D(visName)
@@ -377,7 +354,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     }
 
     if (isVec3Set(this.data.rotation)) {
-      let radians = [this.data.rotation.x, this.data.rotation.y, this.data.rotation.z].map(THREE.Math.degToRad)
+      const radians = [this.data.rotation.x, this.data.rotation.y, this.data.rotation.z].map(THREE.Math.degToRad)
       localQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler().reorder('YXZ').fromArray(radians))
     } else {
       localQuaternion = this.el.object3D.quaternion
@@ -433,7 +410,7 @@ AFRAME.registerComponent('resonance-audio-src', {
     this.mediaAudioSourceNodes.set(
       this.defaultAudioEl, this.room.audioContext.createMediaElementSource(this.defaultAudioEl)
     )
-      
+
     return this.room
   },
 
@@ -471,19 +448,18 @@ AFRAME.registerComponent('resonance-audio-src', {
       this.mediaAudioSourceNodes.set(this.sound, createSourceFn.call(this.room.audioContext, this.sound))
     }
 
-      // Add analyser node for analysing the audio for visualisation
-      this.analyser = this.room.audioContext.createAnalyser();
+    // Add analyser node for analysing the audio for visualisation
+    this.analyser = this.room.audioContext.createAnalyser()
 
-      this.freq_data = new Uint8Array(this.analyser.frequencyBinCount);
+    this.freq_data = new Uint8Array(this.analyser.frequencyBinCount)
 
-      console.log("created analyser node");
+    console.log('created analyser node')
 
-      this.mediaAudioSourceNodes.get(this.sound).connect(this.analyser).connect(this.resonance.input);
+    this.mediaAudioSourceNodes.get(this.sound).connect(this.analyser).connect(this.resonance.input)
     // Get elemenent source AudioNode.
-      //this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
+    // this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
 
-      
-      this.analyser.fftSize = 512;
+    this.analyser.fftSize = 512
 
     return true
   },
