@@ -70,7 +70,8 @@ AFRAME.registerComponent('resonance-audio-src', {
     },
     position: { type: 'vec3', default: new THREE.Vector3(Infinity, Infinity, Infinity) },
     rotation: { type: 'vec3', default: new THREE.Vector3(Infinity, Infinity, Infinity) },
-    visualize: { type: 'boolean', default: false }
+    visualize: { type: 'boolean', default: false },
+    enableanalyser: { type: 'boolean', default: false }
   },
 
   init () {
@@ -96,7 +97,6 @@ AFRAME.registerComponent('resonance-audio-src', {
     this.mediaAudioSourceNodes = new Map()
 
     this.analyser = null // for the analyser node
-
     this.freq_data = null
 
     // Update on entity change.
@@ -120,7 +120,7 @@ AFRAME.registerComponent('resonance-audio-src', {
   changeVis: function (time) {
     const v = this.el.getObject3D(visName)
 
-    if (v) {
+    if (v && this.analyser) {
       this.analyser.getByteFrequencyData(this.freq_data)
 
       const length = this.freq_data.length
@@ -148,7 +148,6 @@ AFRAME.registerComponent('resonance-audio-src', {
   },
 
   update (oldData) {
-    console.log('performing an update')
     if (this.room && oldData.src !== this.data.src) {
       this.connectSrc(this.data.src)
     }
@@ -448,18 +447,25 @@ AFRAME.registerComponent('resonance-audio-src', {
       this.mediaAudioSourceNodes.set(this.sound, createSourceFn.call(this.room.audioContext, this.sound))
     }
 
-    // Add analyser node for analysing the audio for visualisation
-    this.analyser = this.room.audioContext.createAnalyser()
+    const sourceNode = this.mediaAudioSourceNodes.get(this.sound)
 
-    this.freq_data = new Uint8Array(this.analyser.frequencyBinCount)
+    // optionally create an analyser node
 
-    console.log('created analyser node')
+    if (this.data.enableanalyser) {
+      // Add analyser node for analysing the audio for visualisation; this is connected in parallel
+      // to the resonance renderer although it does not modify the audio signal.
+      this.analyser = this.room.audioContext.createAnalyser()
+      this.analyser.fftSize = 512
+      sourceNode.connect(this.analyser)
 
-    this.mediaAudioSourceNodes.get(this.sound).connect(this.analyser).connect(this.resonance.input)
-    // Get elemenent source AudioNode.
-    // this.mediaAudioSourceNodes.get(this.sound).connect(this.resonance.input)
+      // Create an array to store the analysis results
+      this.freq_data = new Uint8Array(this.analyser.frequencyBinCount)
 
-    this.analyser.fftSize = 512
+      console.log('Created WebAudio analyser node.')
+    }
+
+    // Connect to resonance renderer input
+    sourceNode.connect(this.resonance.input)
 
     return true
   },
@@ -503,8 +509,11 @@ AFRAME.registerComponent('resonance-audio-src', {
    */
   disconnect () {
     if (this.sound && this.resonance) {
-        this.mediaAudioSourceNodes.get(this.sound).disconnect(this.analyser)
-        this.analyser.disconnect(this.resonance.input)
+      this.mediaAudioSourceNodes.get(this.sound).disconnect()
+      if (this.analyser) {
+        this.analyser.disconnect()
+        this.analyser = null
+      }
       this.sound = null
     }
     this.connected.element = false
@@ -560,6 +569,7 @@ AFRAME.registerPrimitive('a-resonance-audio-src', {
     rolloff: 'resonance-audio-src.rolloff',
     // The orientation and position are set by the rotation and position components, respectively.
 
-    visualize: 'resonance-audio-src.visualize'
+    visualize: 'resonance-audio-src.visualize',
+    enableanalyser: 'resonance-audio-src.enableanalyser'
   }
 })
