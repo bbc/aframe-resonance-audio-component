@@ -31,14 +31,38 @@ AFRAME.registerComponent('resonance-audio-room', {
     up: { default: 'brick-bare', oneOf: RESONANCE_MATERIAL },
 
     // Whether to show a visualization of the room. This shows a wireframe of the box that is considered as the room.
-    visualize: { type: 'boolean', default: false }
+    visualize: { type: 'boolean', default: false },
+
+    // Whether to apply a convolution to the output of the resonance scene
+    convolution: { type: 'string', default: null }
   },
 
   init () {
     // Initialize the audio context and connect with Resonance.
     this.audioContext = new AudioContext()
     this.resonanceAudioScene = new ResonanceAudio(this.audioContext)
-    this.resonanceAudioScene.output.connect(this.audioContext.destination)
+
+    if (this.data.convolution) {
+      this.convolver = this.audioContext.createConvolver()
+      this.resonanceAudioScene.output.connect(this.convolver)
+      this.convolver.connect(this.audioContext.destination)
+
+      window.fetch(this.data.convolution)
+        .then(response => {
+          console.log(response)
+          return response.blob()
+        })
+        .then(blob => blob.arrayBuffer())
+        .then(buffer => this.audioContext.decodeAudioData(buffer))
+        .then(audioBuffer => { this.convolver.buffer = audioBuffer })
+        .then(() => console.log('set audio buffer for convolver'))
+        .catch((e) => console.error(e))
+
+      console.log('created WebAudio convolver', this.convolver)
+    } else {
+      console.log('not creating WebAudio convolver')
+      this.resonanceAudioScene.output.connect(this.audioContext.destination)
+    }
 
     // Collection of audio sources.
     this.sources = []
@@ -207,6 +231,7 @@ AFRAME.registerPrimitive('a-resonance-audio-room', {
     back: 'resonance-audio-room.back',
     down: 'resonance-audio-room.down',
     up: 'resonance-audio-room.up',
-    visualize: 'resonance-audio-room.visualize'
+    visualize: 'resonance-audio-room.visualize',
+    convolution: 'resonance-audio-room.convolution'
   }
 })
